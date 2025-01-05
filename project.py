@@ -1,130 +1,188 @@
-import OpenGL.GL as gl
-import OpenGL.GLUT as glut
+from OpenGL.GL import *
+from OpenGL.GLUT import *
+from OpenGL.GLU import *
+from button import Button, Text
+from midpointLine import drawLine
+from midpointCircle import drawCircle
+import random
 
-car_x = 0
-car_y = -235 
+# Global Variables
+homepage = True
+levelpage = False
+gamepage = False
+pausepage = False
+gameoverpage = False
+delay = [False, 0]
+animation_loop = 0
 
-# Road divider (initial y-coordinates of dashed points)
-divider_y_positions = [i * 40 for i in range(-500, 500, 1)]
+# Car properties
+car_x = 400
+car_y = 100
+car_width = 50
+car_height = 100
+obstacles = []
+obstacle_speed = 5
+score = 0
 
-# Window dimensions
-width, height = 500, 500
+# Button Instances
+play_button = Button([324, 400], [0.58, 0.749, 0.56], 4, 3, ['PLAY'], [20, 20])
+quitButton = Button([324, 300], [0.788, 0.392, 0.501], 4, 3, ['EXIT'], [20, 20])
 
-def midpoint_circle(cx, cy, r):
-    points = []
-    x, y = 0, r
-    p = 1 - r
-    points.extend([(cx + x, cy + y), (cx - x, cy + y), (cx + x, cy - y), (cx - x, cy - y),
-                   (cx + y, cy + x), (cx - y, cy + x), (cx + y, cy - x), (cx - y, cy - x)])
-    while x < y:
-        x += 1
-        if p < 0:
-            p += 2 * x + 1
-        else:
-            y -= 1
-            p += 2 * (x - y) + 1
-        points.extend([(cx + x, cy + y), (cx - x, cy + y), (cx + x, cy - y), (cx - x, cy - y),
-                       (cx + y, cy + x), (cx - y, cy + x), (cx + y, cy - x), (cx - y, cy - x)])
-    return points
-
-def draw_circle(cx, cy, r):
-    points = midpoint_circle(cx, cy, r)
-    gl.glBegin(gl.GL_POINTS)
-    for point in points:
-        gl.glVertex2f(point[0], point[1])
-    gl.glEnd()
-
-
-def draw_line(x1, y1, x2, y2):
-    dx, dy = x2 - x1, y2 - y1
-    d = 2 * dy - dx
-    x, y = x1, y1
-    gl.glBegin(gl.GL_POINTS)
-    gl.glVertex2f(x, y)
-    while x <= x2:
-        x += 1
-        if d < 0:
-            d += 2 * dy
-        else:
-            y += 1
-            d += 2 * (dy - dx)
-        gl.glVertex2f(x, y)
-    gl.glEnd()
-
-
-def draw_car():
-    # Car body
-    draw_line(car_x - 20, car_y, car_x + 20, car_y)  # Bottom line
-    draw_line(car_x - 20, car_y, car_x - 20, car_y + 20)  # Left side
-    draw_line(car_x + 20, car_y, car_x + 20, car_y + 20)  # Right side
-    draw_line(car_x - 20, car_y + 20, car_x + 20, car_y + 20)  # Top line
-    # Wheels
-    draw_circle(car_x - 15, car_y - 5, 5)
-    draw_circle(car_x + 15, car_y - 5, 5)
-
-
-def draw_road():
-    # Left lane boundary
-    gl.glBegin(gl.GL_POINTS)
-    for y in range(-height // 2, height // 2, 5):
-        gl.glVertex2f(-150, y)  # Left boundary
-        gl.glVertex2f(150, y)   # Right boundary
-    gl.glEnd()
-
-    # Center moving dashed line
-    gl.glBegin(gl.GL_POINTS)
-    for y in divider_y_positions:
-        for x in range(-2, 3):  # Dashed line width
-            gl.glVertex2f(x, y)
-    gl.glEnd()
-
-
-def update(value):
-    global divider_y_positions
-    # Update the divider to simulate downward movement
-    divider_y_positions = [(y - 5 if y > -height // 2 else height // 2) for y in divider_y_positions]
-    glut.glutPostRedisplay()
-    glut.glutTimerFunc(50, update, 0)
-
-
-def display():
-    gl.glClear(gl.GL_COLOR_BUFFER_BIT)
-    gl.glLoadIdentity()
-    draw_road()
-    draw_car()
-    glut.glutSwapBuffers()
-
+def HOMEPAGE():
+    Text.draw("AFTERBURN", [178, 650], [0.858, 0.505, 0.482], 7)
+    Text.draw("ASSAULT", [228, 580], [0.858, 0.505, 0.482], 7)
+    play_button.draw(True)
+    quitButton.draw(True)
 
 def keyboard(key, x, y):
-    global car_x
-    step = 10  # Horizontal movement step
-    if key == b'a' and car_x - 50 > -160:  # Move left within left lane
-        car_x -= step
-    elif key == b'd' and car_x + 50 < 160:  # Move right within right lane
-        car_x += step
-    glut.glutPostRedisplay()
+    global car_x, pausepage, gamepage, homepage
+    if key == b'\x1b':  # Escape key to pause
+        if gamepage:
+            pausepage = True
+            gamepage = False
+    if gamepage:
+        if key == b'a' and car_x - car_width / 2 > 150:
+            car_x -= 20
+        elif key == b'd' and car_x + car_width / 2 < 650:
+            car_x += 20
 
+def mouse(button, state, x, y):
+    global homepage, gamepage, delay, animation_loop
+    if button == GLUT_LEFT_BUTTON and state == GLUT_DOWN:
+        y = 800 - y  # Convert GLUT's y-coordinate
+        if homepage and not delay[0]:
+            if play_button.pressed(x, y):
+                homepage = False
+                gamepage = True
+                delay = [True, (animation_loop - 90) % 100]
+            elif quitButton.pressed(x, y):
+                glutLeaveMainLoop()
 
-def reshape(w, h):
-    gl.glViewport(0, 0, w, h)
-    gl.glMatrixMode(gl.GL_PROJECTION)
-    gl.glLoadIdentity()
-    gl.glOrtho(-width // 2, width // 2, -height // 2, height // 2, -1, 1)
-    gl.glMatrixMode(gl.GL_MODELVIEW)
+def showScreen():
+    global homepage, gamepage
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    glClearColor(0.074, 0.0627, 0.16, 1.0)
+    glLoadIdentity()
+    iterate()
+    if homepage:
+        HOMEPAGE()
+    elif gamepage:
+        GAMEPAGE()
+    glutSwapBuffers()
 
+def iterate():
+    glViewport(0, 0, 800, 800)
+    glMatrixMode(GL_PROJECTION)
+    glLoadIdentity()
+    glOrtho(0.0, 800, 0.0, 800, 0.0, 1.0)
+    glMatrixMode(GL_MODELVIEW)
+    glLoadIdentity()
 
-def main():
-    glut.glutInit()
-    glut.glutInitDisplayMode(glut.GLUT_DOUBLE | glut.GLUT_RGB)
-    glut.glutInitWindowSize(width, height)
-    glut.glutCreateWindow(b"Car Racer Game: Moving Divider")
-    gl.glClearColor(0.0, 0.0, 0.0, 1.0)
-    glut.glutDisplayFunc(display)
-    glut.glutReshapeFunc(reshape)
-    glut.glutKeyboardFunc(keyboard)
-    glut.glutTimerFunc(50, update, 0)
-    glut.glutMainLoop()
+def generate_obstacle():
+    x_pos = random.randint(200, 600)
+    obstacles.append([x_pos, 800, 50, 50])  # [x, y, width, height]
 
+def draw_car():
+    car_color = [1.0, 0.0, 0.0]  # Red car
+    wheel_color = [0.0, 0.0, 0.0]  # Black wheels
+    line_thickness = 2  # Pixel size for the car lines
+    
+    # Car body
+    drawLine(car_x - car_width // 2, car_y, car_x + car_width // 2, car_y, car_color, line_thickness)  # Bottom
+    drawLine(car_x - car_width // 2, car_y, car_x - car_width // 2, car_y + car_height, car_color, line_thickness)  # Left
+    drawLine(car_x + car_width // 2, car_y, car_x + car_width // 2, car_y + car_height, car_color, line_thickness)  # Right
+    drawLine(car_x - car_width // 2, car_y + car_height, car_x + car_width // 2, car_y + car_height, car_color, line_thickness)  # Top
+    
+    # Wheels
+    drawCircle([car_x - 15, car_y - 10], 10, wheel_color, line_thickness)  # Left wheel
+    drawCircle([car_x + 15, car_y - 10], 10, wheel_color, line_thickness)  # Right wheel
 
-if __name__ == "__main__":
-    main()
+def draw_obstacles():
+    obstacle_color = [0.0, 0.0, 1.0]  # Blue obstacles
+    line_thickness = 2  # Pixel size for the obstacle lines
+    
+    for obs in obstacles:
+        drawLine(obs[0] - obs[2] // 2, obs[1], obs[0] + obs[2] // 2, obs[1], obstacle_color, line_thickness)  # Top
+        drawLine(obs[0] - obs[2] // 2, obs[1], obs[0] - obs[2] // 2, obs[1] + obs[3], obstacle_color, line_thickness)  # Left
+        drawLine(obs[0] + obs[2] // 2, obs[1], obs[0] + obs[2] // 2, obs[1] + obs[3], obstacle_color, line_thickness)  # Right
+        drawLine(obs[0] - obs[2] // 2, obs[1] + obs[3], obs[0] + obs[2] // 2, obs[1] + obs[3], obstacle_color, line_thickness)  # Bottom
+
+def draw_road():
+    road_color = [0.5, 0.5, 0.5]  # Grey road
+    line_thickness = 2  # Pixel size for road lines
+    drawLine(150, 0, 150, 800, road_color, line_thickness)  # Left boundary
+    drawLine(650, 0, 650, 800, road_color, line_thickness)  # Right boundary
+    
+    dashed_line_color = [1.0, 1.0, 1.0]  # White dashed line
+    for i in range(0, 800, 40):
+        drawLine(400, i, 400, i + 20, dashed_line_color, line_thickness)  # Center dashed line
+
+def draw_environment():
+    grass_color = [0.0, 0.5, 0.0]  # Green grass
+    line_thickness = 2  # Pixel size for environment lines
+    drawLine(0, 0, 150, 0, grass_color, line_thickness)  # Bottom left
+    drawLine(150, 0, 150, 800, grass_color, line_thickness)  # Left boundary
+    drawLine(0, 800, 150, 800, grass_color, line_thickness)  # Top left
+    drawLine(0, 800, 0, 0, grass_color, line_thickness)  # Left vertical
+
+    drawLine(650, 0, 800, 0, grass_color, line_thickness)  # Bottom right
+    drawLine(650, 0, 650, 800, grass_color, line_thickness)  # Right boundary
+    drawLine(800, 800, 650, 800, grass_color, line_thickness)  # Top right
+    drawLine(800, 800, 800, 0, grass_color, line_thickness)  # Right vertical
+
+def GAMEPAGE():
+    global score, obstacles
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    draw_environment()
+    draw_road()
+    draw_car()
+    draw_obstacles()
+    move_obstacles()
+    check_collision()
+    display_score()
+    glutSwapBuffers()
+
+def move_obstacles():
+    global score, obstacles
+    for obs in obstacles:
+        obs[1] -= obstacle_speed
+        if obs[1] + obs[3] < 0:
+            obstacles.remove(obs)
+            score += 1
+    if len(obstacles) < 5 and random.randint(1, 50) == 1:
+        generate_obstacle()
+
+def check_collision():
+    global gamepage, gameoverpage
+    for obs in obstacles:
+        if (car_x - car_width // 2 < obs[0] + obs[2] // 2 and
+            car_x + car_width // 2 > obs[0] - obs[2] // 2 and
+            car_y < obs[1] + obs[3] and
+            car_y + car_height > obs[1]):
+            gamepage = False
+            gameoverpage = True
+
+def display_score():
+    Text.draw(f"SCORE: {score}", [10, 750], [1.0, 1.0, 1.0], 3)
+
+def animate(value):
+    global animation_loop
+    animation_loop = (animation_loop + 1) % 100
+    if not delay[0] or (delay[1] == animation_loop):
+        delay[0] = False
+    glutPostRedisplay()
+    glutTimerFunc(30, animate, 0)
+
+# Initialize GLUT and start the main loop
+glutInit()
+glutInitDisplayMode(GLUT_RGBA)
+glutInitWindowSize(800, 800)
+glutInitWindowPosition(0, 0)
+glutCreateWindow(b"Afterburn Assault")
+glutDisplayFunc(showScreen)
+glutKeyboardFunc(keyboard)
+glutMouseFunc(mouse)
+animate(0)
+glutMainLoop()
