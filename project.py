@@ -85,19 +85,59 @@ def generate_obstacle():
     obstacles.append([x_pos, 800, 50, 50])  # [x, y, width, height]
 
 def draw_car():
-    car_color = [1.0, 0.0, 0.0]  # Red car
+    car_color = [1.0, 0.0, 0.0]  # Red car body
     wheel_color = [0.0, 0.0, 0.0]  # Black wheels
-    line_thickness = 2  # Pixel size for the car lines
+    rim_color = [0.7, 0.7, 0.7]  # Gray rims
+    window_color = [0.5, 0.5, 0.5]  # Grey windows
+    line_thickness = 2  # Pixel size for lines
+    wheel_radius = 12  # Wheel size
     
-    # Car body
+    # Car body (a bit more streamlined)
     drawLine(car_x - car_width // 2, car_y, car_x + car_width // 2, car_y, car_color, line_thickness)  # Bottom
-    drawLine(car_x - car_width // 2, car_y, car_x - car_width // 2, car_y + car_height, car_color, line_thickness)  # Left
-    drawLine(car_x + car_width // 2, car_y, car_x + car_width // 2, car_y + car_height, car_color, line_thickness)  # Right
-    drawLine(car_x - car_width // 2, car_y + car_height, car_x + car_width // 2, car_y + car_height, car_color, line_thickness)  # Top
+    drawLine(car_x - car_width // 2, car_y, car_x - car_width // 2, car_y + car_height * 0.6, car_color, line_thickness)  # Left side
+    drawLine(car_x + car_width // 2, car_y, car_x + car_width // 2, car_y + car_height * 0.6, car_color, line_thickness)  # Right side
     
-    # Wheels
-    drawCircle([car_x - 15, car_y - 10], 10, wheel_color, line_thickness)  # Left wheel
-    drawCircle([car_x + 15, car_y - 10], 10, wheel_color, line_thickness)  # Right wheel
+    # Car roof (more streamlined curves)
+    drawLine(car_x - car_width // 2, car_y + car_height * 0.6, car_x - car_width // 4, car_y + car_height, car_color, line_thickness)  # Left curve
+    drawLine(car_x + car_width // 2, car_y + car_height * 0.6, car_x + car_width // 4, car_y + car_height, car_color, line_thickness)  # Right curve
+    drawLine(car_x - car_width // 4, car_y + car_height, car_x + car_width // 4, car_y + car_height, car_color, line_thickness)  # Top line
+
+    # Window section (placed centrally)
+    drawLine(car_x - car_width // 4, car_y + car_height * 0.6, car_x - car_width // 4, car_y + car_height * 0.7, window_color, line_thickness)  # Left window side
+    drawLine(car_x + car_width // 4, car_y + car_height * 0.6, car_x + car_width // 4, car_y + car_height * 0.7, window_color, line_thickness)  # Right window side
+    drawLine(car_x - car_width // 4, car_y + car_height * 0.7, car_x + car_width // 4, car_y + car_height * 0.7, window_color, line_thickness)  # Top window line
+
+    # Wheel size and positioning (adjusted for proper F1 appearance)
+    wheel_radius = 12  # Wheel size
+
+    # Rear wheels
+    rear_wheel_offset = 10  # Rear wheel offset from the car's center
+    drawCircle([car_x - car_width // 2 - rear_wheel_offset, car_y + car_height * 0.2], wheel_radius, wheel_color, line_thickness)  # Left rear wheel
+    drawCircle([car_x + car_width // 2 + rear_wheel_offset, car_y + car_height * 0.2], wheel_radius, wheel_color, line_thickness)  # Right rear wheel
+
+    # Front wheels
+    front_wheel_offset = 10  # Front wheel offset from the car's center
+    drawCircle([car_x - car_width // 3 - front_wheel_offset, car_y + car_height - 10], wheel_radius, wheel_color, line_thickness)  # Left front wheel
+    drawCircle([car_x + car_width // 3 + front_wheel_offset, car_y + car_height - 10], wheel_radius, wheel_color, line_thickness)  # Right front wheel
+
+    # Optional: Adding rims and tread textures (if needed for more realism)
+    for wheel_x, wheel_y in [
+        [car_x - car_width // 2 - rear_wheel_offset, car_y + car_height * 0.2],
+        [car_x + car_width // 2 + rear_wheel_offset, car_y + car_height * 0.2],
+        [car_x - car_width // 3 - front_wheel_offset, car_y + car_height - 10],
+        [car_x + car_width // 3 + front_wheel_offset, car_y + car_height - 10],
+    ]:
+        # Rim (slightly smaller than the wheel)
+        drawCircle([wheel_x, wheel_y], wheel_radius * 0.8, rim_color, line_thickness)  # Rim
+        # Tread texture (even smaller, creating a more realistic wheel)
+        drawCircle([wheel_x, wheel_y], wheel_radius * 0.6, [0.2, 0.2, 0.2], line_thickness)  # Tread texture
+
+    # Optional: Add more detailing to the car body (textures like stripes, etc.)
+    stripe_color = [0.0, 0.0, 1.0]  # Blue stripes for decoration
+    drawLine(car_x - car_width // 4, car_y + car_height // 2, car_x + car_width // 4, car_y + car_height // 2, stripe_color, line_thickness)  # Horizontal stripe
+    drawLine(car_x - car_width // 4, car_y + car_height // 2 + 5, car_x + car_width // 4, car_y + car_height // 2 + 5, stripe_color, line_thickness)  # Upper stripe
+    drawLine(car_x - car_width // 4, car_y + car_height // 2 - 5, car_x + car_width // 4, car_y + car_height // 2 - 5, stripe_color, line_thickness)  # Lower stripe
+
 
 def draw_obstacles():
     obstacle_color = [0.0, 0.0, 1.0]  # Blue obstacles
