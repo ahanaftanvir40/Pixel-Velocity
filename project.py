@@ -22,11 +22,14 @@ car_x = 400
 car_y = 100
 car_width = 50
 car_height = 100
+
 obstacles = []
 obstacle_speed = 15
 score = 0
 level = 1
 min_score = 20
+road_left = 160
+road_right = 640 
 
 # Button Instances
 play_button = Button([324, 400], [0.58, 0.749, 0.56], 4, 3, ['PLAY'], [20, 20])
@@ -106,13 +109,13 @@ def iterate():
     glLoadIdentity()
 
 
-
-
 def draw_filled_rectangle(x1, y1, x2, y2, color, px):
     for y in range(y1, y2 + 1):
         drawLine(x1, y, x2, y, color, px)
-        
+ 
 def draw_car():
+    global car_x, car_y, car_height, car_height
+    car_x = max(road_left + car_width // 2, min(car_x, road_right - car_width // 2))
     car_color = [1.0, 0.0, 0.0]  # Red car body
     wheel_color = [0.0, 0.0, 0.0]  # Black wheels
     rim_color = [0.7, 0.7, 0.7]  # Gray rims
