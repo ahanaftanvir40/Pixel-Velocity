@@ -220,51 +220,32 @@ def draw_filled_circle(center, radius, color, px):
         drawCircle(center, r, color, px)
 
 def draw_environment():
-    grass_color = [0.0, 0.5, 0.0]  # Green grass
-    tree_trunk_color = [0.55, 0.27, 0.07]  # Brown for tree trunks
-    tree_leaves_color = [0.0, 0.8, 0.0]  # Bright green for tree leaves
-    bush_color = [0.0, 0.6, 0.0]  # Dark green for bushes
-    rock_color = [0.5, 0.5, 0.5]  # Grey for rocks
-    flower_color = [1.0, 0.0, 0.0]  # Red for flowers
+    pole_color = [0.5, 0.5, 0.5]  # Grey for lamp post poles
+    lamp_color = [1.0, 1.0, 0.0]  # Yellow for the lit lamp
+    base_color = [0.3, 0.3, 0.3]  # Dark grey for lamp post base
     line_thickness = 2  # Pixel size for environment lines
 
-    # Grass areas on the left and right of the road
-    drawLine(0, 0, 150, 0, grass_color, line_thickness)  # Bottom left
-    drawLine(150, 0, 150, 800, grass_color, line_thickness)  # Left boundary
-    drawLine(0, 800, 150, 800, grass_color, line_thickness)  # Top left
-    drawLine(0, 800, 0, 0, grass_color, line_thickness)  # Left vertical
 
-    drawLine(650, 0, 800, 0, grass_color, line_thickness)  # Bottom right
-    drawLine(650, 0, 650, 800, grass_color, line_thickness)  # Right boundary
-    drawLine(800, 800, 650, 800, grass_color, line_thickness)  # Top right
-    drawLine(800, 800, 800, 0, grass_color, line_thickness)  # Right vertical
+    # Left side lamp posts
+    for x, y in [(60, 200), (60, 400), (60, 600)]:
+        draw_filled_rectangle(x - 3, y - 10, x + 3, y - 5, base_color, line_thickness)  # Base
+        drawLine(x, y - 5, x, y + 50, pole_color, line_thickness)  # Pole
+        draw_filled_rectangle(x - 5, y + 50, x + 5, y + 55, lamp_color, line_thickness)  # Lamp head
 
-    # Adding filled trees along the left and right sides
-    for x, y in [(40, 200), (100, 300), (80, 500)]:  # Left side trees
-        draw_filled_circle([x, y - 10], 6, tree_trunk_color, line_thickness)  # Tree trunk
-        draw_filled_circle([x, y + 10], 15, tree_leaves_color, line_thickness)  # Tree leaves
+    # Right side lamp posts
+    for x, y in [(700, 200), (700, 400), (700, 600)]:
+        draw_filled_rectangle(x - 3, y - 10, x + 3, y - 5, base_color, line_thickness)  # Base
+        drawLine(x, y - 5, x, y + 50, pole_color, line_thickness)  # Pole
+        draw_filled_rectangle(x - 5, y + 50, x + 5, y + 55, lamp_color, line_thickness)  # Lamp head
 
-    for x, y in [(680, 250), (740, 400), (710, 600)]:  # Right side trees
-        draw_filled_circle([x, y - 10], 6, tree_trunk_color, line_thickness)  # Tree trunk
-        draw_filled_circle([x, y + 10], 15, tree_leaves_color, line_thickness)  # Tree leaves
+    # Optional: Adding light beams (for aesthetic effect)
+    light_beam_color = [1.0, 1.0, 0.5]  # Soft yellow for light beams
+    for x, y in [(60, 200), (60, 400), (60, 600)]:
+        drawLine(x - 10, y + 55, x + 10, y + 55, light_beam_color, 1)  # Left side beams
 
-    # Adding filled bushes along the sides
-    for x, y in [(60, 100), (120, 150), (90, 600)]:  # Left side bushes
-        draw_filled_circle([x, y], 10, bush_color, line_thickness)
-        draw_filled_circle([x + 10, y + 5], 8, bush_color, line_thickness)
+    for x, y in [(700, 200), (700, 400), (700, 600)]:
+        drawLine(x - 10, y + 55, x + 10, y + 55, light_beam_color, 1)  # Right side beams
 
-    for x, y in [(690, 120), (750, 180), (720, 650)]:  # Right side bushes
-        draw_filled_circle([x, y], 10, bush_color, line_thickness)
-        draw_filled_circle([x - 10, y - 5], 8, bush_color, line_thickness)
-
-    # Adding filled rocks for variation
-    for x, y in [(50, 250), (110, 450), (700, 350), (760, 500)]:
-        draw_filled_circle([x, y], 5, rock_color, line_thickness)
-
-    # Adding filled flowers for color and variety
-    for x, y in [(60, 220), (140, 500), (720, 150), (770, 450)]:
-        draw_filled_circle([x, y], 3, flower_color, line_thickness)
-        draw_filled_circle([x + 2, y + 2], 2, flower_color, line_thickness)
 
 
 
