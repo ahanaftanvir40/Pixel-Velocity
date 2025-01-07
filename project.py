@@ -33,9 +33,9 @@ road_left = 160
 road_right = 640 
 
 # Button Instances
-play_button = Button([324, 400], [0.58, 0.749, 0.56], 4, 3, ['PLAY'], [20, 20])
-quitButton = Button([324, 300], [0.788, 0.392, 0.501], 4, 3, ['EXIT'], [20, 20])
-restart_button = Button([324, 300], [0.78, 0.392, 0.5], 4, 3, ['RESTART'], [20, 20])
+play_button = Button([324, 400], [0.58, 0.749, 0.56], 4, ['PLAY'], [20, 20])
+quitButton = Button([324, 300], [0.788, 0.392, 0.501], 4, ['EXIT'], [20, 20])
+restart_button = Button([324, 300], [0.78, 0.392, 0.5], 4, ['RESTART'], [20, 20])
 
 def HOMEPAGE():
     Text.draw("PIXEL", [178, 650], [0.858, 0.505, 0.482], 7)
