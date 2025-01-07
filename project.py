@@ -268,8 +268,11 @@ def draw_environment():
 
 
 def GAMEPAGE():
-    global score, obstacles
+    global score, obstacles, paused
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    if paused:
+        Text.draw("PAUSED", [300, 400], [1.0, 0.0, 0.0], 5)  
+        return
     draw_environment()
     draw_road()
     draw_car()
@@ -334,7 +337,10 @@ def display_score():
     Text.draw(f"LEVEL: {level}", [600, 750], [1.0, 1.0, 1.0], 3)
 
 def animate(value):
-    global animation_loop
+    global animation_loop, paused
+    if paused:
+        glutTimerFunc(30, animate, 0) 
+        return 
     # animation_loop = (animation_loop + 1) % 100
     # if not delay[0] or (delay[1] == animation_loop):
     #     delay[0] = False
