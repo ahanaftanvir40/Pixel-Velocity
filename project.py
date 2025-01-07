@@ -22,6 +22,7 @@ car_x = 400
 car_y = 100
 car_width = 50
 car_height = 100
+car_health = 100
 
 obstacles = []
 obstacle_speed = 15
@@ -262,6 +263,7 @@ def GAMEPAGE():
     draw_road()
     draw_car()
     draw_obstacles()
+    draw_health_bar()
     move_obstacles()
     check_collision()
     update_level()
@@ -279,14 +281,28 @@ def move_obstacles():
         generate_obstacle()
 
 def check_collision():
-    global gamepage, gameoverpage
+    global gamepage, gameoverpage, car_health
     for obs in obstacles:
         if (car_x - car_width // 2 < obs[0] + obs[2] // 2 and
             car_x + car_width // 2 > obs[0] - obs[2] // 2 and
             car_y < obs[1] + obs[3] and
             car_y + car_height > obs[1]):
-            gamepage = False
-            gameoverpage = True
+            car_health -= 20
+            obstacles.remove(obs)
+            if car_health <= 0: 
+                gamepage = False
+                gameoverpage = True
+
+def draw_health_bar():
+    global car_health
+    max_health = 100  
+    bar_width = 200
+    bar_height = 20
+    bar_x = 300  #health bar centered horizontally
+    bar_y = 750 #health bar near the top
+    draw_filled_rectangle(bar_x, bar_y, bar_x + bar_width, bar_y + bar_height, [0.2, 0.2, 0.2], 1)
+    health_width = int((car_health / max_health) * bar_width)
+    draw_filled_rectangle(bar_x, bar_y, bar_x + health_width, bar_y + bar_height, [0.0, 1.0, 0.0], 1)  # Green bar
 
 def GAMEOVERPAGE():
     global score
