@@ -219,11 +219,6 @@ def draw_road():
     road_offset = (road_offset + 5) % 800
 
 
-def draw_filled_circle(center, radius, color, px):
-    # Draw a filled circle using multiple concentric circles
-    for r in range(radius, 0, -1):
-        drawCircle(center, r, color, px)
-
 def draw_environment():
     pole_color = [0.5, 0.5, 0.5]  # Grey for lamp post poles
     lamp_color = [1.0, 1.0, 0.0]  # Yellow for the lit lamp
@@ -243,8 +238,8 @@ def draw_environment():
         drawLine(x, y - 5, x, y + 50, pole_color, line_thickness)  # Pole
         draw_filled_rectangle(x - 5, y + 50, x + 5, y + 55, lamp_color, line_thickness)  # Lamp head
 
-    # Optional: Adding light beams (for aesthetic effect)
-    light_beam_color = [1.0, 1.0, 0.5]  # Soft yellow for light beams
+    # light beams
+    light_beam_color = [1.0, 1.0, 0.5]  # yellow for light beams
     for x, y in [(60, 200), (60, 400), (60, 600)]:
         drawLine(x - 10, y + 55, x + 10, y + 55, light_beam_color, 1)  # Left side beams
 
@@ -257,9 +252,6 @@ def draw_environment():
 def GAMEPAGE():
     global score, obstacles, paused
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    if paused:
-        Text.draw("PAUSED", [300, 400], [1.0, 0.0, 0.0], 5)  
-        return
     draw_environment()
     draw_road()
     draw_car()
@@ -311,10 +303,11 @@ def GAMEOVERPAGE():
     center_x = 400  
     center_y = 400  
 
-    gameover_y = center_y + 150  # Positioned higher up from the center to allow space for other elements
+    # Positioning the texts and buttons
+    gameover_y = center_y + 150  
     score_y = center_y + 50      # Positioned below the "GAME OVER" text
     level_y = score_y - 50       # Positioned below score
-    button_y = center_y - 250    # Further down to avoid overlap with texts
+    button_y = center_y - 250   
 
     Text.draw("GAME OVER", [center_x - 200, gameover_y], [1.0, 0.0, 0.0], 7)  
     score_text = f"FINAL SCORE: {score}"
