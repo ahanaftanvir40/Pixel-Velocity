@@ -111,6 +111,7 @@ def iterate():
 def draw_filled_rectangle(x1, y1, x2, y2, color, px):
     for y in range(y1, y2 + 1):
         drawLine(x1, y, x2, y, color, px)
+        
 def draw_car():
     car_color = [1.0, 0.0, 0.0]  # Red car body
     wheel_color = [0.0, 0.0, 0.0]  # Black wheels
