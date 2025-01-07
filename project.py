@@ -59,7 +59,7 @@ def keyboard(key, x, y):
             car_x += 20
 
 def mouse(button, state, x, y):
-    global homepage, gamepage, delay, animation_loop, car_x, car_y, gameoverpage, score, obstacles
+    global homepage, gamepage, delay, animation_loop, car_x, car_y, gameoverpage, score, obstacles , car_health
     if button == GLUT_LEFT_BUTTON and state == GLUT_DOWN:
         y = 800 - y  # Convert GLUT's y-coordinate
         if homepage and not delay[0]:
@@ -71,6 +71,7 @@ def mouse(button, state, x, y):
                 glutLeaveMainLoop()
         elif gameoverpage:
             if restart_button.pressed(x, y):
+                car_health = 100
                 restart_game()
                 gameoverpage = False
                 gamepage = True  
