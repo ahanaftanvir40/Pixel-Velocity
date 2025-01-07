@@ -206,8 +206,8 @@ def draw_road():
      # Center dashed line (moving effect)
     dashed_line_color = [1.0, 1.0, 1.0]  # White dashed line
     for i in range(-40, 800, 40):
-        y_start = (i + road_offset) % 800
-        y_end = (i + road_offset + 20) % 800
+        y_start = (i - road_offset) % 800
+        y_end = (i - road_offset + 20) % 800
         if y_start < y_end:
             drawLine(400, y_start, 400, y_end, dashed_line_color, line_thickness)
         else:
