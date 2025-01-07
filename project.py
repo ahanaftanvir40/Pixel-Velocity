@@ -15,6 +15,7 @@ gameoverpage = False
 delay = [False, 0]
 animation_loop = 0
 road_offset = 0
+paused = False
 
 # Car properties
 car_x = 400
@@ -24,10 +25,13 @@ car_height = 100
 obstacles = []
 obstacle_speed = 15
 score = 0
+level = 1
+min_score = 20
 
 # Button Instances
 play_button = Button([324, 400], [0.58, 0.749, 0.56], 4, 3, ['PLAY'], [20, 20])
 quitButton = Button([324, 300], [0.788, 0.392, 0.501], 4, 3, ['EXIT'], [20, 20])
+restart_button = Button([324, 300], [0.78, 0.392, 0.5], 4, 3, ['RESTART'], [20, 20])
 
 def HOMEPAGE():
     Text.draw("PIXEL", [178, 650], [0.858, 0.505, 0.482], 7)
@@ -36,11 +40,14 @@ def HOMEPAGE():
     quitButton.draw(True)
 
 def keyboard(key, x, y):
-    global car_x, pausepage, gamepage, homepage
+    global car_x, pausepage, gamepage, homepage, paused
     if key == b'\x1b':  # Escape key to pause
         if gamepage:
             pausepage = True
             gamepage = False
+    elif key == b'p':  # 'p' key to toggle pause/play
+        if gamepage:
+            paused = not paused
     if gamepage:
         if key == b'a' and car_x - car_width / 2 > 150:
             car_x -= 20
@@ -48,7 +55,7 @@ def keyboard(key, x, y):
             car_x += 20
 
 def mouse(button, state, x, y):
-    global homepage, gamepage, delay, animation_loop
+    global homepage, gamepage, delay, animation_loop, car_x, car_y, gameoverpage, score, obstacles
     if button == GLUT_LEFT_BUTTON and state == GLUT_DOWN:
         y = 800 - y  # Convert GLUT's y-coordinate
         if homepage and not delay[0]:
@@ -58,6 +65,21 @@ def mouse(button, state, x, y):
                 delay = [True, (animation_loop - 90) % 100]
             elif quitButton.pressed(x, y):
                 glutLeaveMainLoop()
+        elif gameoverpage:
+            if restart_button.pressed(x, y):
+                restart_game()
+                gameoverpage = False
+                gamepage = True  
+
+def restart_game():
+    global car_x, car_y, score, level, obstacles, obstacle_speed, min_score
+    car_x = 400
+    car_y = 100
+    score = 0
+    level = 1
+    obstacles = []
+    obstacle_speed = 5
+    min_score = 20
 
 def showScreen():
     global homepage, gamepage
@@ -71,6 +93,8 @@ def showScreen():
         HOMEPAGE()
     elif gamepage:
         GAMEPAGE()
+    elif gameoverpage:
+        GAMEOVERPAGE()
     glutSwapBuffers()
 
 def iterate():
@@ -252,6 +276,7 @@ def GAMEPAGE():
     draw_obstacles()
     move_obstacles()
     check_collision()
+    update_level()
     display_score()
     glutSwapBuffers()
 
@@ -275,8 +300,38 @@ def check_collision():
             gamepage = False
             gameoverpage = True
 
+def GAMEOVERPAGE():
+    global score
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    center_x = 400  
+    center_y = 400  
+
+    gameover_y = center_y + 150  # Positioned higher up from the center to allow space for other elements
+    score_y = center_y + 50      # Positioned below the "GAME OVER" text
+    level_y = score_y - 50       # Positioned below score
+    button_y = center_y - 250    # Further down to avoid overlap with texts
+
+    Text.draw("GAME OVER", [center_x - 200, gameover_y], [1.0, 0.0, 0.0], 7)  
+    score_text = f"FINAL SCORE: {score}"
+    level_text = f"LEVEL REACHED: {level}"
+    Text.draw(score_text, [center_x - 220, score_y], [1.0, 1.0, 1.0], 5) 
+    Text.draw(level_text, [center_x - 220, level_y], [1.0, 1.0, 1.0], 5)
+    restart_button.position = [center_x - 93, button_y]  
+    restart_button.draw(True)  
+    glutSwapBuffers()
+
+
+def update_level():
+    global level, obstacle_speed, min_score
+    if score >= min_score:
+        level += 1
+        obstacle_speed += 2 
+        min_score += 20 
+
+
 def display_score():
     Text.draw(f"SCORE: {score}", [10, 750], [1.0, 1.0, 1.0], 3)
+    Text.draw(f"LEVEL: {level}", [600, 750], [1.0, 1.0, 1.0], 3)
 
 def animate(value):
     global animation_loop
