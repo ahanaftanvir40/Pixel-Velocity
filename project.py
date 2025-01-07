@@ -14,6 +14,7 @@ pausepage = False
 gameoverpage = False
 delay = [False, 0]
 animation_loop = 0
+road_offset = 0
 
 # Car properties
 car_x = 400
@@ -21,7 +22,7 @@ car_y = 100
 car_width = 50
 car_height = 100
 obstacles = []
-obstacle_speed = 5
+obstacle_speed = 15
 score = 0
 
 # Button Instances
@@ -80,10 +81,12 @@ def iterate():
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
 
-def generate_obstacle():
-    x_pos = random.randint(200, 600)
-    obstacles.append([x_pos, 800, 50, 50])  # [x, y, width, height]
 
+
+
+def draw_filled_rectangle(x1, y1, x2, y2, color, px):
+    for y in range(y1, y2 + 1):
+        drawLine(x1, y, x2, y, color, px)
 def draw_car():
     car_color = [1.0, 0.0, 0.0]  # Red car body
     wheel_color = [0.0, 0.0, 0.0]  # Black wheels
@@ -91,77 +94,116 @@ def draw_car():
     window_color = [0.5, 0.5, 0.5]  # Grey windows
     line_thickness = 2  # Pixel size for lines
     wheel_radius = 12  # Wheel size
-    
-    # Car body (a bit more streamlined)
-    drawLine(car_x - car_width // 2, car_y, car_x + car_width // 2, car_y, car_color, line_thickness)  # Bottom
-    drawLine(car_x - car_width // 2, car_y, car_x - car_width // 2, car_y + car_height * 0.6, car_color, line_thickness)  # Left side
-    drawLine(car_x + car_width // 2, car_y, car_x + car_width // 2, car_y + car_height * 0.6, car_color, line_thickness)  # Right side
-    
-    # Car roof (more streamlined curves)
-    drawLine(car_x - car_width // 2, car_y + car_height * 0.6, car_x - car_width // 4, car_y + car_height, car_color, line_thickness)  # Left curve
-    drawLine(car_x + car_width // 2, car_y + car_height * 0.6, car_x + car_width // 4, car_y + car_height, car_color, line_thickness)  # Right curve
-    drawLine(car_x - car_width // 4, car_y + car_height, car_x + car_width // 4, car_y + car_height, car_color, line_thickness)  # Top line
 
-    # Window section (placed centrally)
-    drawLine(car_x - car_width // 4, car_y + car_height * 0.6, car_x - car_width // 4, car_y + car_height * 0.7, window_color, line_thickness)  # Left window side
-    drawLine(car_x + car_width // 4, car_y + car_height * 0.6, car_x + car_width // 4, car_y + car_height * 0.7, window_color, line_thickness)  # Right window side
-    drawLine(car_x - car_width // 4, car_y + car_height * 0.7, car_x + car_width // 4, car_y + car_height * 0.7, window_color, line_thickness)  # Top window line
+    # Car body
+    draw_filled_rectangle(
+        car_x - car_width // 2, car_y, car_x + car_width // 2, int(car_y + car_height * 0.6),
+        car_color, line_thickness
+    )
 
-    # Wheel size and positioning (adjusted for proper F1 appearance)
-    wheel_radius = 12  # Wheel size
+    # Car roof (slightly curved appearance)
+    draw_filled_rectangle(
+        car_x - car_width // 4, int(car_y + car_height * 0.6), car_x + car_width // 4, int(car_y + car_height),
+        car_color, line_thickness
+    )
+
+    # Window section
+    draw_filled_rectangle(
+        car_x - car_width // 4, int(car_y + car_height * 0.6), car_x + car_width // 4, int(car_y + car_height * 0.7),
+        window_color, line_thickness
+    )
 
     # Rear wheels
-    rear_wheel_offset = 10  # Rear wheel offset from the car's center
-    drawCircle([car_x - car_width // 2 - rear_wheel_offset, car_y + car_height * 0.2], wheel_radius, wheel_color, line_thickness)  # Left rear wheel
-    drawCircle([car_x + car_width // 2 + rear_wheel_offset, car_y + car_height * 0.2], wheel_radius, wheel_color, line_thickness)  # Right rear wheel
+    rear_wheel_offset = 10
+    drawCircle([car_x - car_width // 2 - rear_wheel_offset, car_y + car_height * 0.2], wheel_radius, wheel_color, line_thickness)
+    drawCircle([car_x + car_width // 2 + rear_wheel_offset, car_y + car_height * 0.2], wheel_radius, wheel_color, line_thickness)
 
     # Front wheels
-    front_wheel_offset = 10  # Front wheel offset from the car's center
-    drawCircle([car_x - car_width // 3 - front_wheel_offset, car_y + car_height - 10], wheel_radius, wheel_color, line_thickness)  # Left front wheel
-    drawCircle([car_x + car_width // 3 + front_wheel_offset, car_y + car_height - 10], wheel_radius, wheel_color, line_thickness)  # Right front wheel
+    front_wheel_offset = 10
+    drawCircle([car_x - car_width // 3 - front_wheel_offset, car_y + car_height - 10], wheel_radius, wheel_color, line_thickness)
+    drawCircle([car_x + car_width // 3 + front_wheel_offset, car_y + car_height - 10], wheel_radius, wheel_color, line_thickness)
 
-    # Optional: Adding rims and tread textures (if needed for more realism)
+    # Optional: Adding filled rims for the wheels
     for wheel_x, wheel_y in [
         [car_x - car_width // 2 - rear_wheel_offset, car_y + car_height * 0.2],
         [car_x + car_width // 2 + rear_wheel_offset, car_y + car_height * 0.2],
         [car_x - car_width // 3 - front_wheel_offset, car_y + car_height - 10],
         [car_x + car_width // 3 + front_wheel_offset, car_y + car_height - 10],
     ]:
-        # Rim (slightly smaller than the wheel)
         drawCircle([wheel_x, wheel_y], wheel_radius * 0.8, rim_color, line_thickness)  # Rim
-        # Tread texture (even smaller, creating a more realistic wheel)
         drawCircle([wheel_x, wheel_y], wheel_radius * 0.6, [0.2, 0.2, 0.2], line_thickness)  # Tread texture
 
-    # Optional: Add more detailing to the car body (textures like stripes, etc.)
-    stripe_color = [0.0, 0.0, 1.0]  # Blue stripes for decoration
-    drawLine(car_x - car_width // 4, car_y + car_height // 2, car_x + car_width // 4, car_y + car_height // 2, stripe_color, line_thickness)  # Horizontal stripe
-    drawLine(car_x - car_width // 4, car_y + car_height // 2 + 5, car_x + car_width // 4, car_y + car_height // 2 + 5, stripe_color, line_thickness)  # Upper stripe
-    drawLine(car_x - car_width // 4, car_y + car_height // 2 - 5, car_x + car_width // 4, car_y + car_height // 2 - 5, stripe_color, line_thickness)  # Lower stripe
+def generate_obstacle():
+    x_pos = random.randint(200, 600)
+    width = random.randint(30, 80)
+    height = 60
+    # Generate random color
+    obstacles.append([x_pos, 800, width, height])  # Add color to obstacle data
 
 
 def draw_obstacles():
-    obstacle_color = [0.0, 0.0, 1.0]  # Blue obstacles
     line_thickness = 2  # Pixel size for the obstacle lines
-    
+    color = [random.random(), random.random(), random.random()]
+
     for obs in obstacles:
-        drawLine(obs[0] - obs[2] // 2, obs[1], obs[0] + obs[2] // 2, obs[1], obstacle_color, line_thickness)  # Top
-        drawLine(obs[0] - obs[2] // 2, obs[1], obs[0] - obs[2] // 2, obs[1] + obs[3], obstacle_color, line_thickness)  # Left
-        drawLine(obs[0] + obs[2] // 2, obs[1], obs[0] + obs[2] // 2, obs[1] + obs[3], obstacle_color, line_thickness)  # Right
-        drawLine(obs[0] - obs[2] // 2, obs[1] + obs[3], obs[0] + obs[2] // 2, obs[1] + obs[3], obstacle_color, line_thickness)  # Bottom
+        x1 = obs[0] - obs[2] // 2  # Left x-coordinate
+        y1 = obs[1]                # Bottom y-coordinate
+        x2 = obs[0] + obs[2] // 2  # Right x-coordinate
+        y2 = obs[1] + obs[3]       # Top y-coordinate
+                  # Fixed color for the obstacle
+
+        # Draw filled rectangle for the obstacle
+        draw_filled_rectangle(x1, y1, x2, y2, color, line_thickness)
+
+
 
 def draw_road():
-    road_color = [0.5, 0.5, 0.5]  # Grey road
-    line_thickness = 2  # Pixel size for road lines
-    drawLine(150, 0, 150, 800, road_color, line_thickness)  # Left boundary
-    drawLine(650, 0, 650, 800, road_color, line_thickness)  # Right boundary
+    global road_offset
+    road_color = [0.3, 0.3, 0.3]  # Dark grey road
+    line_thickness = 2  # Pixel size for lines
+
     
+
+    # Left and right boundaries using lines
+    drawLine(150, 0, 150, 800, road_color, line_thickness)
+    drawLine(650, 0, 650, 800, road_color, line_thickness)
+
+    # Side stripes (white)
+    side_stripe_color = [1.0, 1.0, 1.0]
+    drawLine(160, 0, 160, 800, side_stripe_color, line_thickness)  # Left side stripe
+    drawLine(640, 0, 640, 800, side_stripe_color, line_thickness)  # Right side stripe
+
+     # Center dashed line (moving effect)
     dashed_line_color = [1.0, 1.0, 1.0]  # White dashed line
-    for i in range(0, 800, 40):
-        drawLine(400, i, 400, i + 20, dashed_line_color, line_thickness)  # Center dashed line
+    for i in range(-40, 800, 40):
+        y_start = (i + road_offset) % 800
+        y_end = (i + road_offset + 20) % 800
+        if y_start < y_end:
+            drawLine(400, y_start, 400, y_end, dashed_line_color, line_thickness)
+        else:
+            # Handle wrapping case
+            drawLine(400, y_start, 400, 800, dashed_line_color, line_thickness)
+            drawLine(400, 0, 400, y_end, dashed_line_color, line_thickness)
+
+    # Update the road offset to simulate movement
+    road_offset = (road_offset + 5) % 800
+
+
+def draw_filled_circle(center, radius, color, px):
+    # Draw a filled circle using multiple concentric circles
+    for r in range(radius, 0, -1):
+        drawCircle(center, r, color, px)
 
 def draw_environment():
     grass_color = [0.0, 0.5, 0.0]  # Green grass
+    tree_trunk_color = [0.55, 0.27, 0.07]  # Brown for tree trunks
+    tree_leaves_color = [0.0, 0.8, 0.0]  # Bright green for tree leaves
+    bush_color = [0.0, 0.6, 0.0]  # Dark green for bushes
+    rock_color = [0.5, 0.5, 0.5]  # Grey for rocks
+    flower_color = [1.0, 0.0, 0.0]  # Red for flowers
     line_thickness = 2  # Pixel size for environment lines
+
+    # Grass areas on the left and right of the road
     drawLine(0, 0, 150, 0, grass_color, line_thickness)  # Bottom left
     drawLine(150, 0, 150, 800, grass_color, line_thickness)  # Left boundary
     drawLine(0, 800, 150, 800, grass_color, line_thickness)  # Top left
@@ -171,6 +213,35 @@ def draw_environment():
     drawLine(650, 0, 650, 800, grass_color, line_thickness)  # Right boundary
     drawLine(800, 800, 650, 800, grass_color, line_thickness)  # Top right
     drawLine(800, 800, 800, 0, grass_color, line_thickness)  # Right vertical
+
+    # Adding filled trees along the left and right sides
+    for x, y in [(40, 200), (100, 300), (80, 500)]:  # Left side trees
+        draw_filled_circle([x, y - 10], 6, tree_trunk_color, line_thickness)  # Tree trunk
+        draw_filled_circle([x, y + 10], 15, tree_leaves_color, line_thickness)  # Tree leaves
+
+    for x, y in [(680, 250), (740, 400), (710, 600)]:  # Right side trees
+        draw_filled_circle([x, y - 10], 6, tree_trunk_color, line_thickness)  # Tree trunk
+        draw_filled_circle([x, y + 10], 15, tree_leaves_color, line_thickness)  # Tree leaves
+
+    # Adding filled bushes along the sides
+    for x, y in [(60, 100), (120, 150), (90, 600)]:  # Left side bushes
+        draw_filled_circle([x, y], 10, bush_color, line_thickness)
+        draw_filled_circle([x + 10, y + 5], 8, bush_color, line_thickness)
+
+    for x, y in [(690, 120), (750, 180), (720, 650)]:  # Right side bushes
+        draw_filled_circle([x, y], 10, bush_color, line_thickness)
+        draw_filled_circle([x - 10, y - 5], 8, bush_color, line_thickness)
+
+    # Adding filled rocks for variation
+    for x, y in [(50, 250), (110, 450), (700, 350), (760, 500)]:
+        draw_filled_circle([x, y], 5, rock_color, line_thickness)
+
+    # Adding filled flowers for color and variety
+    for x, y in [(60, 220), (140, 500), (720, 150), (770, 450)]:
+        draw_filled_circle([x, y], 3, flower_color, line_thickness)
+        draw_filled_circle([x + 2, y + 2], 2, flower_color, line_thickness)
+
+
 
 def GAMEPAGE():
     global score, obstacles
@@ -191,7 +262,7 @@ def move_obstacles():
         if obs[1] + obs[3] < 0:
             obstacles.remove(obs)
             score += 1
-    if len(obstacles) < 5 and random.randint(1, 50) == 1:
+    if len(obstacles) < 20 and random.randint(1, 30) == 1:
         generate_obstacle()
 
 def check_collision():
@@ -209,9 +280,9 @@ def display_score():
 
 def animate(value):
     global animation_loop
-    animation_loop = (animation_loop + 1) % 100
-    if not delay[0] or (delay[1] == animation_loop):
-        delay[0] = False
+    # animation_loop = (animation_loop + 1) % 100
+    # if not delay[0] or (delay[1] == animation_loop):
+    #     delay[0] = False
     glutPostRedisplay()
     glutTimerFunc(30, animate, 0)
 
