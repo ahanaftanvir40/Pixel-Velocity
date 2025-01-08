@@ -12,7 +12,6 @@ levelpage = False
 gamepage = False
 pausepage = False
 gameoverpage = False
-delay = [False, 0]
 animation_loop = 0
 road_offset = 0
 paused = False
@@ -59,14 +58,13 @@ def keyboard(key, x, y):
             car_x += 20
 
 def mouse(button, state, x, y):
-    global homepage, gamepage, delay, animation_loop, car_x, car_y, gameoverpage, score, obstacles , car_health
+    global homepage, gamepage, animation_loop, car_x, car_y, gameoverpage, score, obstacles , car_health
     if button == GLUT_LEFT_BUTTON and state == GLUT_DOWN:
         y = 800 - y  # Convert GLUT's y-coordinate
-        if homepage and not delay[0]:
+        if homepage:
             if play_button.pressed(x, y):
                 homepage = False
                 gamepage = True
-                delay = [True, (animation_loop - 90) % 100]
             elif quitButton.pressed(x, y):
                 glutLeaveMainLoop()
         elif gameoverpage:
@@ -167,8 +165,7 @@ def generate_obstacle():
     x_pos = random.randint(200, 600)
     width = random.randint(30, 80)
     height = 60
-    # Generate random color
-    obstacles.append([x_pos, 800, width, height])  # Add color to obstacle data
+    obstacles.append([x_pos, 800, width, height])
 
 
 def draw_obstacles():
@@ -336,9 +333,6 @@ def animate(value):
     if paused:
         glutTimerFunc(30, animate, 0) 
         return 
-    # animation_loop = (animation_loop + 1) % 100
-    # if not delay[0] or (delay[1] == animation_loop):
-    #     delay[0] = False
     glutPostRedisplay()
     glutTimerFunc(30, animate, 0)
 
