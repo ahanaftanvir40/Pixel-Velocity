@@ -21,7 +21,6 @@ def zoneConversion(x, y, zone):
         return x, -y
     
 def drawLine(x1, y1, x2, y2, color,px):
-    # Line drawing algorithm
     dx = x2 - x1
     dy = y2 - y1
     if abs(dx) > abs(dy):
