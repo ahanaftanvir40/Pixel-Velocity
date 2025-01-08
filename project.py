@@ -246,6 +246,9 @@ def draw_environment():
 def GAMEPAGE():
     global score, obstacles, paused
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    if paused:
+        Text.draw("PAUSED", [300, 400], [1.0, 0.0, 0.0], 5)  
+        return
     draw_environment()
     draw_road()
     draw_car()
