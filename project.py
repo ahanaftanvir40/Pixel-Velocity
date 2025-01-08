@@ -44,10 +44,8 @@ def HOMEPAGE():
 
 def keyboard(key, x, y):
     global car_x, pausepage, gamepage, homepage, paused
-    if key == b'\x1b':  # Escape key to pause
-        if gamepage:
-            pausepage = True
-            gamepage = False
+    if key == b'\x1b':  # Escape key to exit
+           glutLeaveMainLoop()
     elif key == b'p':  # 'p' key to toggle pause/play
         if gamepage:
             paused = not paused
